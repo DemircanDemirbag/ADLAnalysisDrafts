@@ -1,0 +1,552 @@
+# ADL file for the CMS Razor Boost Run 2 analysis based on NanoAODv9
+# Analysis code repository: https://github.com/ssekmen/BoostAnalyzer17/tree/master
+
+#info analysis
+#  title “Inclusive search for SUSY in final states with boosted objects using razor variables with the CMS Run2 data”
+#  experiment CMS
+#  id SUS-23-014
+#  sqrtS 13.0
+#  lumi 138.0
+#
+#info adl
+#  inputformat NanoAODv9 # https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2017UL/docTTToSemiLeptonicTuneCP513TeV-powheg-pythia8RunIISummer20UL17NanoAODv9-106Xmc2017realisticv9-v1.html
+#  adlauthor Changgi Huh, Sezen Sekmen, Demircan Demirbağ
+
+
+####cross product fonksiyonu ekleyecektik
+####elektron ve muon için efficiency gelecekti
+####miniPFRelIsoall fonksiyonu hata veriyor
+
+countsformat mycount
+  process T5bbbbZH, "T5bbbbZH"
+  process R2bbqqlv, "TR2bbqqlv"
+  process R5ttbl, "R5ttbl"
+  process T5qqqqWH, "T5qqqqWH"
+  process T5ttcc, "T5ttcc"
+  process T6ttZH, "T6ttZH"
+
+table HadHTaggingEff
+	tabletype efficiency
+	nvars 1
+	errors true
+	#val     err-    err+    pTmin  pTmax
+	0.0000  0.0000  0.0145     200     300
+	0.1785  0.0396  0.0492     300     400
+	0.1530  0.0409  0.0544     400     500
+	0.1198  0.0415  0.0628     500     600
+	0.0973  0.0414  0.0737     600     800
+	0.0175  0.0108  0.1340     800    2000
+  0.0000  0.0000  0.5000    2000   10000 ###written by me 
+
+table HadTopTaggingEff
+	tabletype efficiency
+	nvars 1
+	errors true
+	#val     err-    err+    pTmin  pTmax
+	0.0000  -0.0000  0.0001     200     300
+	0.2808  0.0040  0.0040     300     400
+	0.5127  0.0042  0.0042     400     500
+	0.6576  0.0046  0.0045     500     600
+	0.7312  0.0053  0.0053     600     800
+	0.7720  0.0107  0.0103     800    2000
+	0.0000  0.0000  0.5000    2000   10000
+
+table HadWTaggingEff
+	tabletype efficiency
+	nvars 1
+	errors true
+	#val     err-    err+    pTmin  pTmax
+	0.2937  0.0042  0.0042     200     300
+	0.2154  0.0033  0.0034     300     400
+	0.1660  0.0029  0.0029     400     500
+	0.1314  0.0029  0.0030     500     600
+	0.1034  0.0033  0.0034     600     800
+	0.0956  0.0064  0.0068     800    2000
+	0.0000  0.0000  0.4444    2000   10000
+
+table HadZTaggingEff
+	tabletype efficiency
+	nvars 1
+	errors true
+	#val     err-    err+    pTmin  pTmax
+	0.1425  0.0037  0.0038     200     300
+	0.2408  0.0036  0.0036     300     400
+	0.2244  0.0042  0.0042     400     500
+	0.1853  0.0051  0.0052     500     600
+	0.1750  0.0070  0.0072     600     800
+	0.1591  0.0131  0.0141     800    2000
+	0.0000  0.0000  0.5000    2000   10000
+
+table btagdeepCSVmedium
+	tabletype efficiency
+	nvars 1
+	errors true
+	# val    err-     err+     pTmin     pTmax
+	0.5790   0.0016   0.0016    -10.4     30.0
+	0.6314   0.0013   0.0013     30.0     35.0
+	0.6442   0.0011   0.0011     35.0     40.0
+	0.6596   0.0007   0.0007     40.0     50.0
+	0.6727   0.0007   0.0007     50.0     60.0
+	0.6812   0.0008   0.0008     60.0     70.0
+	0.6855   0.0008   0.0008     70.0     80.0
+	0.6873   0.0009   0.0009     80.0     90.0
+	0.6881   0.0010   0.0010     90.0    100.0
+	0.6880   0.0008   0.0008    100.0    125.0
+	0.6867   0.0011   0.0011    125.0    150.0
+	0.6826   0.0015   0.0015    150.0    175.0
+	0.6734   0.0020   0.0020    175.0    200.0
+	0.6624   0.0026   0.0026    200.0    225.0
+	0.6494   0.0034   0.0034    225.0    250.0
+	0.6419   0.0044   0.0044    250.0    275.0
+	0.6301   0.0054   0.0054    275.0    300.0
+	0.6202   0.0051   0.0051    300.0    350.0
+	0.6006   0.0073   0.0073    350.0    400.0
+	0.5889   0.0098   0.0098    400.0    450.0
+	0.5798   0.0126   0.0126    450.0    500.0
+	0.5547   0.0118   0.0118    500.0    600.0
+	0.5412   0.0172   0.0172    600.0    700.0
+	0.5197   0.0234   0.0234    700.0    800.0
+	0.4959   0.0243   0.0243    800.0   7000.0
+
+# OBJECT SELECTION
+
+# AK4 jets
+object JetAK4
+  take Jet
+  select pt(Jet)  > 30
+  select abseta(Jet) < 2.4
+
+
+# b-tagged jets - medium
+object MediumBTag
+  take JetAK4
+  select abs(flavor(JetAK4)) == 5
+  select applyHM(btagdeepCSVmedium(Pt(JetAK4)) == 1)
+
+
+# AK8 jets
+object JetAK8
+  take FatJet
+  select pt(FatJet) > 200
+  select abseta(FatJet) < 2.4
+
+object GenTop
+  take gen
+  select abs(pdgid(gen)) == 6
+  
+object GenW
+  take gen
+  select abs(pdgid(gen)) == 24
+
+object GenZ
+  take gen
+  select abs(pdgid(gen)) == 23
+
+object GenH
+  take gen
+  select abs(pdgid(gen)) == 25
+
+# hadronic top jets - top-tagged
+object HadTop # using TopparticleNet1 tagger
+  take JetAK8
+  select pt(JetAK8) > 400
+  select dR(JetAK8,GenTop) < 0.8
+  select applyHM(HadTopTaggingEff(Pt(JetAK8)) == 1)
+
+# hadronic Ws: W-tagged
+object HadW # using WparticleNet2 tagger
+  take JetAK8
+  select dR(JetAK8,GenW) < 0.8
+  select pt(JetAK8) > 200
+
+  select applyHM(HadWTaggingEff(Pt(JetAK8)) == 1)
+
+# hadronic Zs: Z-tagged
+object HadZ # using ZparticleNet2 tagger
+  take JetAK8 
+  select pt(JetAK8) > 200
+  select dR(JetAK8,GenZ) < 0.8
+  select applyHM(HadZTaggingEff(Pt(JetAK8)) == 1)
+
+# hadronic Vs, i.e. Ws and Zs - W or Z-tagged
+object HadV : union(HadW, HadZ)
+
+# hadronic Higgses: H-tagged
+object HadH # using HparticleNet1 tagger
+  take JetAK8 
+  select pt(JetAK8) > 300
+  select dR(JetAK8,GenH) < 0.81
+  select applyHM(HadHTaggingEff(Pt(JetAK8)) == 1)
+
+object MediumIsoBTag
+  take MediumBTag
+  #select dR(MediumBTag, HadV) > 0.8 and dR(MediumBTag, HadH) > 0.8 ###why does it work until region SRLeptop0htop but then it stops working? the error:
+  # 3 particle selection is not allowed in this version!
+  select dR(MediumBTag, HadW) > 0.8 and dR(MediumBTag, HadH) > 0.8 and dR(MediumBTag, HadZ) > 0.8
+
+# muons - veto
+object MuonIso
+  take Muon
+  #select softId(Muon) == 1
+  select pt(Muon) >= 5
+  select abseta(Muon) < 2.4
+  select abs(d0(Muon)) < 0.2
+  select abs(dz(Muon)) < 0.5
+  select miniIso(Muon) < 0.4
+### relative isolation.  dR < 0.3 icerisinde bulunan charged ve neutral nesnelerin pT toplaminin muon pT'ye bolunmesi.  CutLang'da uygulanmis olacakti.  Degilse de cok kolay uygulanir.
+
+# muons - select
+object MuonSelect
+  take Muon
+  #select mediumPromptId(Muon) == 1
+### muon identification kriteri.  Efficiency ile uygulamak gerekecek.
+  select pt(Muon) >= 10
+  select abs(eta(Muon)) < 2.4
+  select miniIso(Muon) < 0.2
+  select abs(d0(Muon)) < 0.05
+  select abs(dz(Muon)) < 0.1
+
+# muons - non-isolated
+object MuonNonIso
+  take Muon
+  #select softId(Muon) == 1 ###gelecekte implement edilebilir
+  select pt(Muon) >= 30
+  select abs(eta(Muon)) < 2.4
+  select abs(d0(Muon)) < 0.05
+  select abs(dz(Muon)) < 0.1
+  #select sip3d(Muon) < 4 ###gelecekte implement edilebilir
+  #select dR(Muon, jetDRmin) > 0.4 or jetPtRelv2(Muon) > 15 # Ptrel = |plep x pjet| / |pjet|
+#### cross product fonksiyonu ekleyecektik
+
+# electrons - veto
+object ElectronIso
+  take Electron
+  #select mvaFall17V2noIsoWPL(Electron) == 1
+### elektron identification yontemi.  Efficiency ile halletmek gerekecek.
+  select pt(Electron) > 5
+  select abseta(Electron) < 2.5
+  select abs(d0(Electron)) < 0.05
+  select abs(dz(Electron)) < 0.1
+  select miniIso(Electron) < 0.4
+
+
+# electrons - select
+object ElectronSelect #iso ###control et
+  take Electron
+  #select mvaFall17V2noIsoWP90(Electron) == 1
+  select pt(Electron) >= 10
+  select abs(eta(Electron)) < 2.5
+  select abs(eta(Electron)) ][ 1.442 1.556
+  select miniIso(Electron) < 0.1 ###approximation for miniPFRelIsoall(Electron)
+  select abs(d0(Electron)) < 0.05
+  select abs(dz(Electron)) < 0.1
+
+# electrons - non-isolated
+object ElectronNonIso
+  take Electron
+  #select mvaFall17V2noIsoWPL(Electron) == 1
+  select pt(Electron) > 30
+  select abs(eta(Electron)) < 2.5
+  select abs(eta(Electron)) ][ 1.442 1.556
+  select abs(d0(Electron)) < 0.05
+  select abs(dz(Electron)) < 0.1
+  #select dR(Electron, jetDRmin) > 0.4 or jetPtRelv2(Electron) > 15 # pTrellepton = |vec(plepton) x vec(pjet)| / |vec(pjet)|
+###cross product
+
+
+object IsoTracks #Since we do not apply cuts discriminating electron, muon and hadron; this is short and 1 block
+  take Trk #### TRK diye bir şey yok
+  select abs(eta(Trk)) < 2.4
+  select pt(Trk) > 5
+  select (ptcone(Trk) / pt(Trk)) < 0.2
+  select sqrt( 2*pT(Trk) *MET*(1-cos( Phi(METLV[0]) - Phi(Trk) ))) < 100
+
+
+# leptons - veto
+object LeptonIso : union(ElectronIso, MuonIso)
+
+# leptons - select
+object LeptonSelect : union(ElectronSelect, MuonSelect)
+
+## leptons - non-isolated
+object LeptonNonIso : union(ElectronNonIso, MuonNonIso)
+
+
+
+# Leptonic jets and tops
+object LepJet
+  take FatJet
+  select dR(FatJet, LeptonNonIso) < 0.8
+  select pt(FatJet) >= 300
+  select abs(eta(FatJet)) < 2.4
+  #select m(FatJet) >= 50
+
+
+
+# Megajets are 4-vectors, each consisting of multiple jet.
+# Each event with njets > 0 is partitioned into 2 megajets.
+object megajets ####problem yaratıyor
+  take JetAK4
+  select pt(JetAK4) > 0
+  #select fmegajets(JetAK4) == 1
+
+
+## EVENT VARIABLES
+
+define MRmegajets = fMR(megajets) 
+define Rsq = sqrt(fMTR(megajets, METLV[0]) / MRmegajets)
+define MTlepIso = fMR(megajets) ####fMT(LeptonIso[0], METLV[0]) olması gereken şeyi geçici olarak comment out ettim
+
+define Wlep = LeptonNonIso[0] + METLV[0] #### bunu da sevmiyor
+# EVENT SELECTION
+  select ALL
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023
+
+
+# Preselection regions:
+region Pre
+  select ALL
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(LeptonNonIso) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(GenH) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(GenW) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(GenZ) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(GenTop) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(HadH) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(HadZ) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(HadW) >= 0
+  counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  #good primary vertices > 0
+  #counts mycount 8.33654308319092, 1846.92150878906, 249.692947387695, 5.02357721328735, 8.53005790710449, 27.7106552124023 #NoCuts
+  select size(JetAK8) >=1
+  counts mycount 8.00194358825684, 1685.62414550781, 213.71955871582, 4.80234384536743, 8.17674541473389, 26.0980224609375 #Pre_1JetAK8
+  select size(JetAK4) >= 2
+  counts mycount 7.6107382774353, 1685.62414550781, 213.700668334961, 4.61948204040527, 8.17644214630127, 26.0932445526123 #Pre_NJetPre
+  select size(megajets) > 0 ? MRmegajets > 800 : ALL
+  counts mycount 7.235520362854, 1622.58471679688, 213.700668334961, 4.50791072845459, 8.16322231292725, 23.7142543792725 #Pre_MR
+  select Rsq > 0.08
+  counts mycount 6.73714065551758, 514.96044921875, 45.1121215820313, 4.18021392822266, 7.13544845581055, 19.1930866241455 #Pre_R2
+
+region PreHad #isolated select, isolated veto, nonisolated 
+  Pre
+  select size(LeptonSelect) == 0
+  counts mycount 4.56343364715576, 222.038391113281, 0.0948862805962563, 2.96627283096313, 4.02170848846436, 8.7882251739502 #Pre_Had_0IsoMu
+  select size(IsoTracks) == 0
+  counts mycount 4.56343364715576, 222.038391113281, 0.0948862805962563, 2.96627283096313, 4.02170848846436, 8.7882251739502 #Pre_Had_0IsoTrack
+  select size(LepJet) == 0
+  counts mycount 4.46404361724854, 220.028228759766, 0.0948862805962563, 2.89119553565979, 3.95417046546936, 8.68062973022461 #Pre_Had_0LepJet
+  select size(megajets) >= 2 ###added to comply with the next line. 
+  counts mycount 4.46404361724854, 220.028228759766, 0.0948862805962563, 2.89119553565979, 3.95417046546936, 8.68062973022461 #Pre_Had_0LepJet
+  select dPhi(megajets[0], megajets[1]) < 2.8
+  counts mycount 4.05566358566284, 111.302116394043, 0.0558214113116264, 2.60472869873047, 3.26662611961365, 6.62173700332642 #Pre_Had_dPhi
+
+region PreLep
+  Pre
+  select size(LeptonSelect) == 1
+  counts mycount 0.759218394756317, 251.442657470703, 5.39167022705078, 0.94170331954956, 2.29943013191223, 6.23489475250244 #Pre_Lep_1Lep
+  select size(IsoTracks) == 0
+  counts mycount 0.759218394756317, 251.442657470703, 5.39167022705078, 0.94170331954956, 2.29943013191223, 6.23489475250244 #Pre_Lep_0IsoTrack
+  select size(LepJet) == 0
+  counts mycount 0.479937523603439, 163.281433105469, 3.01689314842224, 0.695271134376526, 1.50615811347961, 4.17338275909424 #Pre_Lep_0LepJet
+  select MTlepIso > 120
+  counts mycount 0.381258457899094, 127.274223327637, 2.64868569374084, 0.641493201255798, 1.19503581523895, 2.97997379302979 #Pre_Lep_MT
+####son sayıları scale factor'lerden sonraki sayılara göre mi koymalıyım
+region PrelepJet
+  Pre
+  select size(LepJet) >= 1
+  select size(IsoTracks) == 0
+  select MTlepIso > 140
+  select dphi(JetAK8[0], Wlep) >= 0.8
+
+# Fully hadronic signal regions
+region SRHad1htop
+  PreHad
+  select size(HadTop) == 1
+  select size(JetAK4) >= 5
+  select size(HadH) == 0
+
+region SRHad2htop
+  PreHad
+  select size(HadTop) >= 2
+  select size(JetAK4) >= 2
+#  select size(b) > 1####bu ne olmalı bak
+  select size(HadH) == 0
+
+region SRHadVb45j
+  PreHad
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) [] 4 5
+  select size(HadTop) == 0
+  select size(HadH) == 0
+
+region SRHadVb6j
+  PreHad
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) >= 6
+  select size(HadTop) == 0
+  select size(HadH) == 0
+
+region SRHad1V0b34j
+  PreHad
+  select size(HadV) == 1
+  select size(MediumIsoBTag) == 0#####
+  select size(JetAK4) [] 3 4
+  select size(HadTop) == 0
+  select size(HadH) == 0
+####################################
+region SRHad1V0b5j
+  PreHad
+  select size(HadV) == 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) >= 5
+  select size(HadTop) == 0
+  select size(HadH) == 0
+
+region SRHad2V0b24j
+  PreHad
+  select size(HadV) >= 2
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) [] 2 4
+  select size(HadTop) == 0
+  select size(HadH) == 0
+
+region SRHad2V0b5j
+  PreHad
+  select size(HadV) >= 2
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) >= 5
+  select size(HadTop) == 0
+  select size(HadH) == 0
+
+region SRHadHb45j
+  PreHad
+  select size(HadV) >= 1 ####cutflowda yok ama tabloda bu vardı
+  select size(HadH) >= 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) [] 4 5
+
+region SRHadHb6j
+  PreHad
+  select size(HadH) >= 1
+  select size(HadV) == 0 ####cutflowda =0 ama tabloda >=1 idi
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) >= 6
+
+region SRHadHVb6j
+  PreHad
+  select size(HadH) == 1
+  select size(HadV) == 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) >= 6
+
+region SRHad1H0b34j
+  PreHad
+  select size(HadH) >= 1
+  select size(HadV) == 0 #### ama tabloda >= 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) [] 3 4
+
+region SRHad1H0b5j
+  PreHad
+  select size(HadH) >= 1
+  select size(HadV) == 0 #### ama tabloda >= 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) >= 5
+
+region SRHadHV0b24j
+  PreHad
+  select size(HadH) >= 1
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) [] 2 4
+
+region SRHadHV0b5j
+  PreHad
+  select size(HadH) >= 1
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) >= 5
+
+
+
+# Isolated lepton signal regions
+region SRLep1htop
+  PreLep
+  #select size(JetAK4) >= 3 ####Njet cut'ı yok cutflow'da
+  select size(HadTop) == 1
+  select size(HadH) == 0 ####bu region'ın ismi 1h neden 0h istenmiş hem tabloda hem cutflow'da
+
+region SRLepVb
+  PreLep
+  select size(HadH) == 0 ####cutflow'da bu yok
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) >= 4
+  select size(HadTop) == 0
+
+region SRLepV0b
+  PreLep
+  select size(HadH) == 0 ####cutflow'da bu yok
+  select size(HadV) >= 1
+  select size(MediumIsoBTag) == 0
+  select size(JetAK4) >= 2
+  select size(HadTop) == 0
+
+region SRLepHb3j
+  PreLep
+  select size(HadH) >= 1
+  select size(MediumIsoBTag) >= 1
+  select size(JetAK4) >= 3
+
+region SRLepH0b2j
+  PreLep
+  select size(HadH) >= 1
+  select size(MediumIsoBTag) == 0
+
+# Non-isolated lepton signal regions
+region SRLeptop0htop ####cutflow'da yok
+  PrelepJet
+  select size(JetAK4) >= 2
+  select size(MediumIsoBTag) == 0
+  select size(HadV) >= 1
+  select size(HadH) == 0
+  select size(HadTop) == 0
+
+#
+region SRLeptop1htop
+  PrelepJet
+  select size(JetAK4) >= 3
+  select size(HadTop) >= 1
+
+region SRLepjet0V24j
+  PrelepJet
+  select size(HadV) == 0
+  select size(JetAK4) [] 2 4
+  select size(HadTop) == 0
+
+region SRLepjet0V5j
+  PrelepJet
+  select size(HadV) == 0
+  select size(JetAK4) >= 5
+  select size(HadTop) == 0
+
+region SRLepjet1V24j
+  PrelepJet
+  select size(HadV) == 1
+  select size(JetAK4) [] 2 4
+  select size(HadTop) == 0
+
+region SRLepjet1V5j
+  PrelepJet
+  select size(HadV) == 1
+  select size(JetAK4) >= 5
+  select size(HadTop) == 0
